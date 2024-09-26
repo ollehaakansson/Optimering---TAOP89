@@ -10,12 +10,12 @@ filc=" ".join(sys.argv[1:]).split('.')[0]+'.npz'
 npzfile = np.load(filc)
 c=npzfile['c']
 b=npzfile['b']
-A=npzfile['A']
+A=npzfile['A'] # values - nix has the corresponding indicies
 bix=npzfile['bix']
 zcheat=npzfile['zcheat']
 xcheat=npzfile['xcheat']
 
-bix=bix-1
+bix=bix-1 # indicies base variables
 
 t1=time.time()
 
@@ -23,7 +23,7 @@ t1=time.time()
 print('Rows: '+repr(m)+' cols: '+repr(n))
 
 # Create nix
-nix=np.setdiff1d(range(n), bix) 
+nix=np.setdiff1d(range(n), bix) # indicies non-basic variables
 
 B  = A[:, bix]
 N  = A[:, nix]
@@ -45,10 +45,39 @@ while iter >= 0:
     #             There will allways always be three variables.
     #
     #--------
+    # calculate the inverse of B
+    B_inv = np.linalg.inv(B)
 
+    # compute the right hand sides (basic variabels values)
+    # skalärprodukt
+    b_x = np.dot(B_inv, b)
+
+    # calculate the reduced cost for the non-basix varibales
+    # "zero:ed" matrice with the size of nix
+    rc = np.zeros(len(nix))
+
+    # going through all non-basic variables in A with the helo of the indicies i nix.
+    # i - is the index within the nix
+    # j - is the index within the problem, meaning it corresponds to the column
+    # in thre matrix A and vector c.
+    for i, j in enumerate(nix):
+        aj = A[:, j] # extracting the column corresponding to non-basic variable.
+                     # A[:, j] select the entire column of A that corresponds with non-basic var x_j.
+        
+
+        # c[j] is the cost coefficient of the non-basic variable x_j from the objective function.
+        # cB.T is the transpose of the cost vector for the basic variables. The transpose turns it into a row vector so it can be multiplied by the matrix.
+        # B_inv is the inverse of the basis matrix B, which is formed from the columns of A that correspond to the basic variables.
+        # aj is the column of matrix A corresponding to the non-basic variable x_j.
+
+        rc[i] = c[j] - np.dot(np.dot(cB.T, B_inv), aj) # r_j = c_j - (C_B)^T * B^-1 * A_j
+
+    # Find the the most negative reduced cost.
+    rc_min = np.min(rc)
+    inc_var = np.argmin(rc)
 
     # calc most negative reduced cost, rc_min,
-    # and index for entering variable, inkvar
+    # and index for entering variable, inc_var
     # --------
 
 
@@ -73,11 +102,11 @@ while iter >= 0:
             print('Unbounded solution!')
             iter=-1
         else:
-            # calc leaving var, utgvar
+            # calc leaving var, utg_var
             # --------
 
 
-            print(' Iter: '+repr(iter)+' z: '+repr(z)+' rc: '+repr(rc_min)+' ink: '+repr(inkvar+1)+' utg: '+repr(utgvar+1))
+            print(' Iter: '+repr(iter)+' z: '+repr(z)+' rc: '+repr(rc_min)+' ink: '+repr(inc_var+1)+' utg: '+repr(utg_var+1))
 
             # make new partition
             # --------
