@@ -2,6 +2,10 @@ import numpy as np
 import time
 import sys
 
+
+# Run the code: python3 simplex.py <path-to-dataset>
+# Process the data set (.npz-file)
+
 filc=" ".join(sys.argv[1:]).split('.')[0]+'.npz'
 npzfile = np.load(filc)
 c=npzfile['c']
@@ -33,7 +37,14 @@ while iter >= 0:
     iter+=1
     
     # calc right-hand-sides and reduced costs
-    # --------
+    # TODO: define rc_min.
+    #
+    #       Note: Slack variabels will not allways be basevariables.
+    #             Slack variables will not allways be in the dataset.
+    #             We want to implement slack variables ONE time before we Start.
+    #             There will allways always be three variables.
+    #
+    #--------
 
 
     # calc most negative reduced cost, rc_min,
@@ -41,8 +52,8 @@ while iter >= 0:
     # --------
 
 
-
-    if rc_min >= -1.0E-12:
+    #reduced cost with a tolerance of 10^-6
+    if rc_min >= -1.0E-6:
         print('Ready')
         iter=-1
  
