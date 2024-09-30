@@ -103,10 +103,12 @@ while iter >= 0:
         a = np.dot(B_inv, A[:, inix])
 
 
-        if max(a) <= 0 :
+        if np.all(a <= 1e-10):
             # unbounded solution
             print('Unbounded solution!')
             iter=-1
+            break #new
+
         else:
             # Calculate the outgoing variable
             ratios = np.full(len(x_b), np.inf)  # Set the values to infinity as to not interfere with np.argmin
