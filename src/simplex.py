@@ -123,7 +123,11 @@ while iter >= 0:
             print(' Iter: '+repr(iter)+' z: '+repr(z)+' rc: '+repr(rc_min)+' ink: '+repr(inc_var+1)+' utg: '+repr(utg_var+1))
 
             # make new partition
-            # --------
+            bix[utg_var], nix[inc_var] = nix[inc_var], bix[utg_var]
+            
+            #Update the basis and non-basis matrices after the pivot
+            B = A[:, bix]  # Update the basis matrix
+            N = A[:, nix]  # Update the non-basis matrix
 
 
 elapsed = time.time() - t1
