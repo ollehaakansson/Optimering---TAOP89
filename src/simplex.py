@@ -108,8 +108,16 @@ while iter >= 0:
             print('Unbounded solution!')
             iter=-1
         else:
-            # calc leaving var, utg_var
-            # --------
+            # Calculate the outgoing variable
+            ratios = np.full(len(x_b), np.inf)  # Set the values to infinity as to not interfere with np.argmin
+            for i in range(len(x_b)):
+                if a[i] > 0:  # Only consider positive a values
+                    ratios[i] = x_b[i] / a[i]
+
+            utg_var = np.argmin(ratios)  # Find the variable with the minimum positive ratio
+
+            # Print iteration information
+            z = np.dot(cB.T, x_b)  # Calculate the current objective function value
 
 
             print(' Iter: '+repr(iter)+' z: '+repr(z)+' rc: '+repr(rc_min)+' ink: '+repr(inc_var+1)+' utg: '+repr(utg_var+1))
