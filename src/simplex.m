@@ -1,5 +1,5 @@
-function simplex_solver(filename)
-    % Load the problem data
+function simplex(filename)
+    % Ladda in problemdatan
     data = load(filename);
     A = data.A;
     b = data.b;
@@ -8,77 +8,78 @@ function simplex_solver(filename)
     xcheat = data.xcheat;
     zcheat = data.zcheat;
     
-    % Initial setup
-    B = A(:, bix);  % Basis matrix
-    nix = setdiff(1:size(A, 2), bix);  % Non-basic variables
-    max_iterations = 100;  % Just to avoid infinite loops
-    tolerance = 1e-6;
-    
-    % Start timer
+    % Starta tidtagning
     tic;
     
-    for iter = 1:max_iterations
-        % Step 1: Solve Bx_B = b for x_B
-        x_B = B \ b;
-        
-        % Step 2: Calculate reduced costs c_N - c_B * inv(B) * A_N
-        c_B = c(bix);
-        c_N = c(nix);
+    % Storleken på problemet
+    [m, n] = size(A);
+
+    % Skapa nix, dvs indexvektorn för ickebasvariabler
+    nix = setdiff([1:n], bix);
+
+    % Skapa initial partition
+    B = A(:, bix);
+    N = A(:, nix);
+    cB = c(bix, :);
+    cN = c(nix, :);
+    
+    % Initiera variabler
+    opt = 0;
+    iter = 0;
+    
+    while opt == 0
+        iter = iter + 1;
+
+        % Steg 1: Lös Bx_B = b för x_B
+        xb = B \ b;
+
+        % Steg 2: Beräkna reducerade kostnader c_N - c_B * inv(B) * A_N
         invB = inv(B);
-        reduced_costs = c_N' - c_B' * invB * A(:, nix);
+        rc = cN' - cB' * invB * N;
+
+        % Steg 3: Beräkna mest negativ reducerad kostnad och index för inkommande variabel
+        [rc_min, inkix] = min(rc);
         
-        % Step 3: Check optimality
-        if all(reduced_costs >= -tolerance)
-            disp('Optimal solution found');
-            x = zeros(size(c));  % Full solution
-            x(bix) = x_B;
-            z = c' * x;  % Objective function value
+        if rc_min >= -1.0E-6
+            opt = 1;
+            disp('Optimum');
+        else
+            % Steg 4: Beräkna inkommande kolumn
+            a = invB * A(:, nix(inkix));
             
-            % Stop the timer and display execution time
-            elapsed_time = toc;
-            
-            fprintf('Optimal x:\n');
-            disp(x);
-            fprintf('Optimal z: %f\n', z);
-            fprintf('Difference to cheat solution: ||x - xcheat|| = %f\n', norm(x - xcheat));
-            fprintf('Difference in objective function: |z - zcheat| = %f\n', abs(z - zcheat));
-            fprintf('Execution time: %.6f seconds\n', elapsed_time);  % Display elapsed time
-            return;
+            if max(a) <= 0
+                disp('Obegränsad lösning');
+                break;
+            else
+                % Steg 5: Bestäm utgående variabel
+                theta = xb ./ a;
+                theta(a <= 0) = Inf;  % Ignorera negativa och nollvärden
+                [min_theta, utgix] = min(theta);
+
+                % Utskrift av iterationens resultat
+                z = cB' * xb;  % Målfunktionsvärde
+                disp(sprintf('Iter: %d, z: %f, rc_min: %f, ink: %d, utg: %d', iter, z, rc_min, nix(inkix), bix(utgix)));
+                
+                % Steg 6: Uppdatera basen genom att byta ut bas- och ickebasvariabler
+                bix(utgix) = nix(inkix);
+                nix(inkix) = bix(utgix);
+
+                % Uppdatera partitionerna skibidi toilett
+                B = A(:, bix);
+                N = A(:, nix);
+                cB = c(bix, :);
+                cN = c(nix, :);
+            end
         end
-        
-        % Step 4: Choose entering variable (most negative reduced cost)
-        [min_val, inix] = min(reduced_costs);
-        if min_val >= 0
-            disp('Solution is optimal.');
-            break;
-        end
-        entering_var = nix(inix);
-        
-        % Step 5: Calculate the direction vector d_B
-        d_B = invB * A(:, entering_var);
-        
-        % Step 6: Determine leaving variable
-        theta = x_B ./ d_B;
-        theta(d_B <= 0) = Inf;  % Ignore non-positive directions
-        [min_theta, outix] = min(theta);
-        if isinf(min_theta)
-            disp('The problem is unbounded.');
-            
-            % Stop the timer and display execution time
-            elapsed_time = toc;
-            fprintf('Execution time: %.6f seconds\n', elapsed_time);  % Display elapsed time
-            return;
-        end
-        leaving_var = bix(outix);
-        
-        % Step 7: Update the basis
-        bix(outix) = entering_var;
-        nix(inix) = leaving_var;
-        B = A(:, bix);  % Update basis matrix
     end
     
-    % Stop the timer if max iterations reached and display execution time
+    % Avsluta tidtagning och skriv ut resultat
     elapsed_time = toc;
-    disp('Maximum iterations reached.');
-    fprintf('Execution time: %.6f seconds\n', elapsed_time);  % Display elapsed time
+    z = cB' * xb;  % Målfunktionsvärde
+    disp(sprintf('z: %f', z));
+    x = zeros(n, 1);
+    x(bix) = xb;
+    disp(sprintf('sum(x-xcheat): %f', sum(x - xcheat)));
+    disp(sprintf('z-zcheat: %f', z - zcheat));
+    fprintf('Execution time: %.6f seconds\n', elapsed_time);  % Visa exekveringstid
 end
