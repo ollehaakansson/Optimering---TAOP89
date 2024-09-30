@@ -50,7 +50,7 @@ while iter >= 0:
 
     # compute the right hand sides (basic variabels values)
     # skalärprodukt
-    b_x = np.dot(B_inv, b)
+    x_b = np.dot(B_inv, b)
 
     # calculate the reduced cost for the non-basix varibales
     # "zero:ed" matrice with the size of nix
@@ -87,15 +87,21 @@ while iter >= 0:
         iter=-1
  
         # construct solution, x, and check it
-        # --------
+        x = np.zeros(n) # full solution vector (i.e. all variables)
+        x[bix] = x_b # base variables
+        z = np.dot(cB.T, x_b) # calculate the objective function value
 
         diffx = np.linalg.norm(x-xcheat)
         diffz = z-zcheat
         print('xdiff: '+repr(diffx))
         print('zdiff: '+repr(diffz))
     else:
+        # entering variable is the one with the most reduced cost.
+        inix = nix[inc_var]
+        
         # calc entering column, a
-        # --------
+        a = np.dot(B_inv, A[:, inix])
+
 
         if max(a) <= 0 :
             # unbounded solution
