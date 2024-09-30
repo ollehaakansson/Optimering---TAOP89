@@ -107,7 +107,6 @@ while iter >= 0:
             # unbounded solution
             print('Unbounded solution!')
             iter=-1
-            break #new
 
         else:
             # Calculate the outgoing variable
