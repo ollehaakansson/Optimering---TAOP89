@@ -5,29 +5,29 @@ import copy
 
 e=1
 
-prob=" ".join(sys.argv[1:]).split('.')[0]
-fil=prob+'.npz'
+problem=" ".join(sys.argv[1:]).split('.')[0]
+file_name=problem+'.npz'
 
-npzfile = np.load(fil)
+npzfile = np.load(file_name)
 npzfile.files
-m=npzfile['m']
-n=npzfile['n']
-s=npzfile['s']
-d=npzfile['d']
-f=npzfile['f']
-c=npzfile['c']
-#print 'm:',m,' n:',n
-#print 's:',s
-#print 'd:',d
-#print 'f:',f
-#print 'c:',c
+num_sites=npzfile['m']
+num_customers=npzfile['n']
+capacity_site=npzfile['s']
+demand=npzfile['d']
+fixed_cost=npzfile['f']
+transport_cost=npzfile['c']
+#print 'num_sites:',num_sites,' num_customers:',num_customers
+#print 'capacity_site:',capacity_site
+#print 'demand:',demand
+#print 'fixed_cost:',fixed_cost
+#print 'transport_cost:',transport_cost
 
 t1=time.time()
-x=np.zeros((m,n),dtype=np.int16)
-y=np.zeros((m),dtype=np.int16)
+x=np.zeros((num_sites,num_customers),dtype=np.int16)
+y=np.zeros((num_sites),dtype=np.int16)
 
-ss=copy.deepcopy(s)
-dd=copy.deepcopy(d)
+ss=copy.deepcopy(capacity_site)
+dd=copy.deepcopy(demand)
 
 while sum(dd)>0:
     # find facility, find customer, send, at min cost
@@ -40,7 +40,7 @@ while sum(dd)>0:
 elapsed = time.time() - t1
 print('Tid: '+str('%.4f' % elapsed))
 
-cost=sum(sum(np.multiply(c,x))) + e*np.dot(f,y)
-print('Problem:',prob,' Totalkostnad: '+str(cost))
+cost=sum(sum(np.multiply(transport_cost,x))) + e*np.dot(fixed_cost,y)
+print('Problem:',problem,' Totalkostnad: '+str(cost))
 print('y:',y)
-print('Antal byggda fabriker:',sum(y),'(av',m,')')
+print('Antal byggda fabriker:',sum(y),'(av',num_sites,')')
