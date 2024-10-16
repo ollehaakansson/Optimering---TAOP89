@@ -94,8 +94,14 @@ print('Tid: '+str('%.4f' % elapsed))
 
 
 cost = np.sum(np.multiply(transport_cost, alloc_matrix)) + epsilon * np.dot(fixed_cost, facility_status)
+print(f'problem: {problem}')
+print(f'Total cost: {cost}')
+print(f'Num iterations: {num_iterations}')
+print(f'Time: {elapsed:.5f} seconds')
+print(f'Num opened facilities: {np.sum(facility_status)} of {num_sites}')
+print(f'Facility_status (y): {facility_status}')
 
 #cost=sum(sum(np.multiply(transport_cost,x))) + epsilon*np.dot(fixed_cost,y)
-print('Problem:',problem,' Totalkostnad: '+str(cost))
-print('y:',y)
-print('Antal byggda fabriker:',sum(y),'(av',num_sites,')')
+#print('Problem:',problem,' Totalkostnad: '+str(cost))
+#print('y:',y)
+#print('Antal byggda fabriker:',sum(y),'(av',num_sites,')')
