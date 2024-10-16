@@ -89,11 +89,13 @@ while sum(rem_demand)>0:
         facility_cost[selected_facility] = -1 # Exclude it from further iterations.
 
     num_iterations += 1
-
 elapsed = time.time() - t1
 print('Tid: '+str('%.4f' % elapsed))
 
-cost=sum(sum(np.multiply(transport_cost,x))) + epsilon*np.dot(fixed_cost,y)
+
+cost = np.sum(np.multiply(transport_cost, alloc_matrix)) + epsilon * np.dot(fixed_cost, facility_status)
+
+#cost=sum(sum(np.multiply(transport_cost,x))) + epsilon*np.dot(fixed_cost,y)
 print('Problem:',problem,' Totalkostnad: '+str(cost))
 print('y:',y)
 print('Antal byggda fabriker:',sum(y),'(av',num_sites,')')
