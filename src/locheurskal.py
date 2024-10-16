@@ -45,11 +45,31 @@ shipping_cost = np.array(copy.deepcopy(transport_cost), dtype=float)
 num_iterations = 0
 # Start timer
 t1=time.time()
+
+# ---------
+# find facility, find customer, send, at min cost
+# set x and y
+# deduct from ss and dd, 
+# -------- 
 while sum(rem_demand)>0:
-    # find facility, find customer, send, at min cost
-    # set x and y
-    # deduct from ss and dd, 
-    # -------- 
+    #initialize helping variables
+    # inf to be replaced with an actual cost and -1 = no selected
+    min_facility_cost = float('inf')
+    selected_facility = -1
+    min_shipping_cost = float('inf')
+    selected_customer = -1
+    
+    # select facility with the lowest cost
+    for facility_index in range(len(facility_cost)):
+        if facility_cost[facility_index] >= 0 and facility_cost[facility_index] < min_facility_cost:
+            min_facility_cost = facility_cost[facility_index]
+            selected_facility = facility_index
+
+    # select the customer with the lowest shipping cost for the chosen facility
+    for customer_index in range(len(shipping_cost[selected_facility])):
+        if shipping_cost[selected_facility][customer_index] < min_shipping_cost:
+            min_shipping_cost = shipping_cost[selected_facility][customer_index]
+            selected_customer = customer_index
 
 
 
