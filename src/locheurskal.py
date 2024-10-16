@@ -3,24 +3,33 @@ import time
 import sys
 import copy
 
-e=1
+epsilon=1
 
 problem=" ".join(sys.argv[1:]).split('.')[0]
 file_name=problem+'.npz'
 
 npzfile = np.load(file_name)
-npzfile.files
+#npzfile.files
 num_sites=npzfile['m']
 num_customers=npzfile['n']
 capacity_site=npzfile['s']
 demand=npzfile['d']
 fixed_cost=npzfile['f']
 transport_cost=npzfile['c']
+
 #print 'num_sites:',num_sites,' num_customers:',num_customers
 #print 'capacity_site:',capacity_site
 #print 'demand:',demand
 #print 'fixed_cost:',fixed_cost
 #print 'transport_cost:',transport_cost
+
+
+# initialize solution variables
+alloc_matrix = np.zeros((num_sites,num_customers), dtype=int)
+facility_status = np.zeros((num_sites), dtype=int)
+
+rem_capacity = copy.deepcopy(capacity_site)
+rem_demand = copy.deepcopy(demand)
 
 t1=time.time()
 x=np.zeros((num_sites,num_customers),dtype=np.int16)
@@ -40,7 +49,7 @@ while sum(dd)>0:
 elapsed = time.time() - t1
 print('Tid: '+str('%.4f' % elapsed))
 
-cost=sum(sum(np.multiply(transport_cost,x))) + e*np.dot(fixed_cost,y)
+cost=sum(sum(np.multiply(transport_cost,x))) + epsilon*np.dot(fixed_cost,y)
 print('Problem:',problem,' Totalkostnad: '+str(cost))
 print('y:',y)
 print('Antal byggda fabriker:',sum(y),'(av',num_sites,')')
