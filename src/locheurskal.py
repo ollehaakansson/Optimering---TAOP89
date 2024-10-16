@@ -25,24 +25,31 @@ transport_cost=npzfile['c']
 
 
 # initialize solution variables
-alloc_matrix = np.zeros((num_sites,num_customers), dtype=int)
-facility_status = np.zeros((num_sites), dtype=int)
+#x=np.zeros((num_sites,num_customers),dtype=np.int16)
+#y=np.zeros((num_sites),dtype=np.int16)
 
+alloc_matrix = np.zeros((num_sites,num_customers), dtype=np.int16)
+facility_status = np.zeros((num_sites), dtype=np.int16)
+
+#ss=copy.deepcopy(capacity_site)
+#dd=copy.deepcopy(demand)
 rem_capacity = copy.deepcopy(capacity_site)
 rem_demand = copy.deepcopy(demand)
 
+# Convert cost arrays to floats for large and negative values.
+facility_cost = np.array(copy.deepcopy(fixed_cost), dtype=float)
+shipping_cost = np.array(copy.deepcopy(transport_cost), dtype=float)
+
+
+# counter
+num_iterations = 0
+# Start timer
 t1=time.time()
-x=np.zeros((num_sites,num_customers),dtype=np.int16)
-y=np.zeros((num_sites),dtype=np.int16)
-
-ss=copy.deepcopy(capacity_site)
-dd=copy.deepcopy(demand)
-
-while sum(dd)>0:
+while sum(rem_demand)>0:
     # find facility, find customer, send, at min cost
     # set x and y
     # deduct from ss and dd, 
-    # --------
+    # -------- 
 
 
 
