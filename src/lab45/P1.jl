@@ -8,10 +8,15 @@ using JuMP          # Import JuMP for optimization modeling
 using Printf        # Import Printf for formatted output
 
 # Include the data file that contains problem parameters (m, n, s, d, f, c, e)
-include("juliaData/floc1.jl")
+include("juliaData/floc2.jl")
+
+println("m: $m")
+println("m: $n")
 
 # Define the optimization model and specify HiGHS as the solver
 model_P1 = Model(HiGHS.Optimizer)
+
+e=1
 
 # Define decision variables:
 # x[i,j] represents the quantity transported from facility i to customer j

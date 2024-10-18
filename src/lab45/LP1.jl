@@ -6,9 +6,9 @@ using HiGHS        # Import the HiGHS solver for linear optimization.
 using JuMP         # Import JuMP for modeling optimization problems.
 
 # Read and include the problem data.
-include("juliaData/floc1.jl")
+include("juliaData/floc2.jl")
 
-# Specify the solver for the optimization problem using HiGHS.
+# Specify the solver for the optimization problem using HiGHS
 LP1 = Model(HiGHS.Optimizer)
 
 # Define decision variables:
@@ -40,5 +40,5 @@ cost = objective_value(LP1)
 println("Optimal cost for LP1: $cost")
 
 # Count the number of facilities that are opened (where y[i] is greater than 0.5 in the continuous relaxation)
-num_open_facilities = sum(value(y[i]) > 0.5 for i in 1:m)
+num_open_facilities = sum(value(y[i]) for i in 1:m if value(y[i]) > 0.5)  
 println("Open facilities: $num_open_facilities")

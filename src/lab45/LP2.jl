@@ -6,7 +6,7 @@ using HiGHS        # Import the HiGHS solver for linear optimization
 using JuMP         # Import JuMP for modeling optimization problems
 
 # Read and include the problem data.
-include("juliaData/floc1.jl")
+include("juliaData/floc2.jl")
 
 # Specify the solver for the optimization problem using HiGHS
 LP2 = Model(HiGHS.Optimizer)
