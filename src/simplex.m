@@ -1,85 +1,89 @@
+
 function simplex(filename)
-    % Ladda in problemdatan
+    % Load the problem data
     data = load(filename);
     A = data.A;
     b = data.b;
     c = data.c;
-    bix = data.bix;
-    xcheat = data.xcheat;
-    zcheat = data.zcheat;
+    basic_vars = data.bix;  % Basic variables
+    optimal_solution = data.xcheat;
+    optimal_value = data.zcheat;
     
-    % Starta tidtagning
+    % Start timing the execution
     tic;
     
-    % Storleken på problemet
+    % Problem dimensions
     [m, n] = size(A);
 
-    % Skapa nix, dvs indexvektorn för ickebasvariabler
-    nix = setdiff([1:n], bix);
+    % Create the nonbasic variable index vector
+    nonbasic_vars = setdiff(1:n, basic_vars);
 
-    % Skapa initial partition
-    B = A(:, bix);
-    N = A(:, nix);
-    cB = c(bix, :);
-    cN = c(nix, :);
+    % Initial partition
+    B = A(:, basic_vars);
+    N = A(:, nonbasic_vars);
+    cB = c(basic_vars, :);
+    cN = c(nonbasic_vars, :);
     
-    % Initiera variabler
-    opt = 0;
-    iter = 0;
+    % Initialize variables
+    is_optimal = false;
+    iteration = 0;
     
-    while opt == 0
-        iter = iter + 1;
+    while ~is_optimal
+        iteration = iteration + 1;
 
-        % Steg 1: Lös Bx_B = b för x_B
-        xb = B \ b;
+        % Step 1: Solve B * x_B = b for x_B
+        xB = B \ b;
 
-        % Steg 2: Beräkna reducerade kostnader c_N - c_B * inv(B) * A_N
+        % Step 2: Calculate reduced costs c_N - c_B * inv(B) * A_N
         invB = inv(B);
-        rc = cN' - cB' * invB * N;
+        reduced_costs = cN' - cB' * invB * N;
 
-        % Steg 3: Beräkna mest negativ reducerad kostnad och index för inkommande variabel
-        [rc_min, inkix] = min(rc);
+        % Step 3: Find the most negative reduced cost and the index of the entering variable
+        [min_reduced_cost, entering_index] = min(reduced_costs);
         
-        if rc_min >= -1.0E-6
-            opt = 1;
-            disp('Optimum');
+        if min_reduced_cost >= -1.0E-6
+            is_optimal = true;
+            disp('Optimal solution found');
         else
-            % Steg 4: Beräkna inkommande kolumn
-            a = invB * A(:, nix(inkix));
+            % Step 4: Calculate the entering column
+            entering_column = invB * A(:, nonbasic_vars(entering_index));
             
-            if max(a) <= 0
-                disp('Obegränsad lösning');
+            if max(entering_column) <= 0
+                disp('Unbounded solution');
                 break;
             else
-                % Steg 5: Bestäm utgående variabel
-                theta = xb ./ a;
-                theta(a <= 0) = Inf;  % Ignorera negativa och nollvärden
-                [min_theta, utgix] = min(theta);
+                % Step 5: Determine the leaving variable
+                theta = xB ./ entering_column;
+                theta(entering_column <= 0) = Inf;  % Ignore non-positive values
+                [min_theta, leaving_index] = min(theta);
 
-                % Utskrift av iterationens resultat
-                z = cB' * xb;  % Målfunktionsvärde
-                disp(sprintf('Iter: %d, z: %f, rc_min: %f, ink: %d, utg: %d', iter, z, rc_min, nix(inkix), bix(utgix)));
+                % Print the iteration results
+                objective_value = cB' * xB;  % Objective function value
+                fprintf('Iter: %d, Objective: %f, Min Reduced Cost: %f, Entering: %d, Leaving: %d\n', ...
+                        iteration, objective_value, min_reduced_cost, nonbasic_vars(entering_index), basic_vars(leaving_index));
                 
-                % Steg 6: Uppdatera basen genom att byta ut bas- och ickebasvariabler
-                bix(utgix) = nix(inkix);
-                nix(inkix) = bix(utgix);
+                % Step 6: Update the basis by swapping basic and nonbasic variables
+                temp = basic_vars(leaving_index);
+                basic_vars(leaving_index) = nonbasic_vars(entering_index);
+                nonbasic_vars(entering_index) = temp;
 
-                % Uppdatera partitionerna skibidi toilett
-                B = A(:, bix);
-                N = A(:, nix);
-                cB = c(bix, :);
-                cN = c(nix, :);
+                % Update partitions
+                B = A(:, basic_vars);
+                N = A(:, nonbasic_vars);
+                cB = c(basic_vars, :);
+                cN = c(nonbasic_vars, :);
             end
         end
     end
     
-    % Avsluta tidtagning och skriv ut resultat
+    % Stop timing and print results
     elapsed_time = toc;
-    z = cB' * xb;  % Målfunktionsvärde
-    disp(sprintf('z: %f', z));
+    objective_value = cB' * xB;  % Final objective function value
+    fprintf('Final Objective Value: %f\n', objective_value);
     x = zeros(n, 1);
-    x(bix) = xb;
-    disp(sprintf('sum(x-xcheat): %f', sum(x - xcheat)));
-    disp(sprintf('z-zcheat: %f', z - zcheat));
-    fprintf('Execution time: %.6f seconds\n', elapsed_time);  % Visa exekveringstid
+    x(basic_vars) = xB;
+    fprintf('Sum of differences with optimal solution: %f\n', sum(x - optimal_solution));
+    fprintf('Difference in objective value: %f\n', objective_value - optimal_value);
+    fprintf('Execution time: %.6f seconds\n', elapsed_time);  % Display execution time
 end
+
